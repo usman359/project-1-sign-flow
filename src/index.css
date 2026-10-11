@@ -6,6 +6,7 @@
 
 @theme inline {
     --font-heading: var(--font-sans);
+    --font-display: 'Newsreader', ui-serif, Georgia, serif;
     --font-sans: 'Geist', 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
@@ -48,24 +49,24 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
+    --background: oklch(0.985 0.004 90);
+    --foreground: oklch(0.2 0.015 160);
+    --card: oklch(0.995 0.003 90);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.511 0.262 276.966);
+    --primary: oklch(0.42 0.075 160);
     --primary-foreground: oklch(0.985 0 0);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0.004 277);
-    --muted-foreground: oklch(0.52 0.02 277);
-    --accent: oklch(0.96 0.02 277);
-    --accent-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.955 0.008 95);
+    --muted-foreground: oklch(0.5 0.02 150);
+    --accent: oklch(0.94 0.025 155);
+    --accent-foreground: oklch(0.3 0.06 160);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.585 0.2 277);
+    --border: oklch(0.905 0.01 95);
+    --input: oklch(0.905 0.01 95);
+    --ring: oklch(0.55 0.08 160);
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
@@ -89,8 +90,8 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.62 0.2 277);
-    --primary-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.7 0.11 160);
+    --primary-foreground: oklch(0.2 0.03 160);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
@@ -129,4 +130,10 @@
   html {
     @apply font-sans;
     }
+}
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+  }
 }

@@ -61,7 +61,7 @@ export function EmployeeDashboard() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-display text-3xl font-medium tracking-tight">
           Hello{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}
         </h1>
         <p className="text-sm text-muted-foreground">

@@ -2,14 +2,10 @@ import { useEffect, useState, type FormEvent } from "react"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import {
-  CheckCircle2Icon,
   EyeIcon,
   EyeOffIcon,
   Loader2Icon,
   MailCheckIcon,
-  PenLineIcon,
-  ShieldCheckIcon,
-  UsersIcon,
 } from "lucide-react"
 
 import { Logo } from "@/components/Logo"
@@ -21,10 +17,10 @@ import { supabase } from "@/lib/supabase"
 
 const RESEND_COOLDOWN = 60
 
-const highlights = [
-  { icon: PenLineIcon, text: "Review and sign documents in seconds, from any device." },
-  { icon: UsersIcon, text: "Managers assign documents and track progress at a glance." },
-  { icon: ShieldCheckIcon, text: "Every signature is stamped onto the PDF and stored securely." },
+const steps = [
+  "A manager uploads a PDF and picks who needs to sign it.",
+  "Each employee reviews the document and signs on screen.",
+  "The signed copy is saved and the manager sees who signed, and when.",
 ]
 
 export function AuthPage({ mode }: { mode: "login" | "signup" }) {
@@ -33,6 +29,8 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [isManager, setIsManager] = useState(false)
+  const [inviteCode, setInviteCode] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [needsConfirmation, setNeedsConfirmation] = useState(false)
   const [awaitingEmail, setAwaitingEmail] = useState(false)
@@ -70,7 +68,10 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
         email,
         password,
         options: {
-          data: { full_name: fullName.trim() },
+          data: {
+            full_name: fullName.trim(),
+            ...(isManager && { invite_code: inviteCode.trim() }),
+          },
           emailRedirectTo: window.location.origin,
         },
       })
@@ -102,31 +103,25 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      <aside className="relative hidden flex-col justify-between overflow-hidden bg-primary p-12 text-primary-foreground lg:flex">
-        <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-16 size-96 rounded-full bg-black/20 blur-3xl" />
-        <Logo size="lg" className="relative [&>span:first-child]:bg-white/15" />
-        <div className="relative flex flex-col gap-8">
-          <h2 className="max-w-md text-4xl font-semibold leading-tight tracking-tight">
-            Get every document signed, without the chasing.
+      <aside className="hidden flex-col justify-between bg-[oklch(0.27_0.05_160)] p-12 text-[oklch(0.96_0.01_95)] lg:flex">
+        <Logo size="lg" className="[&>span:first-child]:bg-[oklch(0.96_0.01_95)] [&>span:first-child]:text-[oklch(0.27_0.05_160)]" />
+        <div className="flex max-w-md flex-col gap-10">
+          <h2 className="font-display text-5xl font-normal leading-[1.1] tracking-tight">
+            Paperwork that gets signed, not chased.
           </h2>
-          <ul className="flex max-w-md flex-col gap-5">
-            {highlights.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-start gap-3 text-primary-foreground/90">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
-                  <Icon className="size-4" />
-                </span>
-                <span className="pt-1 text-sm leading-relaxed">{text}</span>
+          <ol className="flex flex-col gap-4 border-t border-white/15 pt-6 text-sm leading-relaxed text-white/75">
+            {steps.map((step, i) => (
+              <li key={step} className="flex gap-4">
+                <span className="font-display text-base text-white/50">0{i + 1}</span>
+                {step}
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
-        <p className="relative text-xs text-primary-foreground/60">
-          Sign Flow · Secure document signing
-        </p>
+        <p className="text-xs text-white/50">Secure document signing for teams</p>
       </aside>
 
-      <main className="flex items-center justify-center bg-background p-6">
+      <main className="flex items-center justify-center p-6">
         <div className="flex w-full max-w-sm flex-col gap-8">
           <Logo className="lg:hidden" />
 
@@ -136,7 +131,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
                 <MailCheckIcon className="size-6" />
               </div>
               <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-semibold tracking-tight">Check your email</h1>
+                <h1 className="font-display text-3xl font-medium tracking-tight">Check your email</h1>
                 <p className="text-sm text-muted-foreground">
                   We sent a confirmation link to{" "}
                   <span className="font-medium text-foreground">{email}</span>. Open it to activate
@@ -158,7 +153,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
           ) : (
             <>
               <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-semibold tracking-tight">
+                <h1 className="font-display text-3xl font-medium tracking-tight">
                   {isSignup ? "Create your account" : "Welcome back"}
                 </h1>
                 <p className="text-sm text-muted-foreground">
@@ -199,6 +194,28 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
                     />
                   </div>
                 )}
+                {isSignup && (
+                  <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1 text-sm font-medium">
+                    {[
+                      { value: false, label: "Employee" },
+                      { value: true, label: "Manager" },
+                    ].map((option) => (
+                      <button
+                        key={option.label}
+                        type="button"
+                        aria-pressed={isManager === option.value}
+                        onClick={() => setIsManager(option.value)}
+                        className={
+                          isManager === option.value
+                            ? "rounded-md bg-background py-1.5 shadow-sm"
+                            : "rounded-md py-1.5 text-muted-foreground hover:text-foreground"
+                        }
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -235,18 +252,24 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
                     </button>
                   </div>
                 </div>
+                {isSignup && isManager && (
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="inviteCode">Manager invite code</Label>
+                    <Input
+                      id="inviteCode"
+                      required
+                      autoComplete="off"
+                      placeholder="Ask an existing manager for a code"
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                    />
+                  </div>
+                )}
                 <Button type="submit" size="lg" className="mt-2 w-full" disabled={submitting}>
                   {submitting && <Loader2Icon className="animate-spin" />}
                   {isSignup ? "Create account" : "Sign in"}
                 </Button>
               </form>
-
-              {isSignup && (
-                <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CheckCircle2Icon className="size-3.5" />
-                  New accounts start with the employee role.
-                </p>
-              )}
 
               <p className="text-sm text-muted-foreground">
                 {isSignup ? "Already have an account? " : "Don't have an account? "}

@@ -1,0 +1,41 @@
+- generic:
+  - generic:
+    - generic [aria-hidden]:
+      - banner:
+        - generic:
+          - link:
+            - /url: /
+            - generic: Sign Flow
+          - navigation:
+            - link:
+              - /url: /employee
+              - text: My documents
+          - generic:
+            - generic: employee
+            - button:
+              - generic: AE
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - link:
+                - /url: /employee
+                - text: Back
+              - generic:
+                - heading [level=1]: QA Employment Agreement
+                - generic: Pending
+            - button [expanded]: Sign document
+          - generic: Employment Agreement (QA test) I agree to the terms of this test document.
+    - region "Notifications alt+T"
+  - dialog [ref=f3e204]:
+    - generic [ref=f3e205]:
+      - heading "Sign \"QA Employment Agreement\"" [level=2] [ref=f3e206]
+      - paragraph [ref=f3e207]: Your signature, name and the current time will be added to the last page.
+    - generic [ref=f3e208]:
+      - generic [ref=f3e209]: Draw your signature here
+      - button "Clear" [active] [ref=f3e212] [cursor=pointer]
+    - paragraph [ref=f3e213]: Signing as Alice Employee (alice@signflow.test)
+    - generic [ref=f3e214]:
+      - button "Cancel" [ref=f3e215] [cursor=pointer]
+      - button "Sign & submit" [disabled]
+    - button "Close" [ref=f3e216] [cursor=pointer]

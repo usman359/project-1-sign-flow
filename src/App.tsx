@@ -12,6 +12,7 @@ import { AuthProvider } from "@/context/AuthProvider"
 import { AuthPage } from "@/pages/AuthPage"
 import { EmployeeDashboard } from "@/pages/employee/EmployeeDashboard"
 import { ManagerDashboard } from "@/pages/manager/ManagerDashboard"
+import { TeamPage } from "@/pages/manager/TeamPage"
 import { UploadDocument } from "@/pages/manager/UploadDocument"
 
 // PDF rendering and stamping libraries are heavy; load them only on these pages.
@@ -43,6 +44,7 @@ export default function App() {
             <Route element={<ProtectedRoute role="manager" />}>
               <Route element={<AppLayout />}>
                 <Route path="/manager" element={<ManagerDashboard />} />
+                <Route path="/manager/team" element={<TeamPage />} />
                 <Route path="/manager/upload" element={<UploadDocument />} />
                 <Route path="/manager/documents/:documentId" element={<DocumentDetail />} />
               </Route>

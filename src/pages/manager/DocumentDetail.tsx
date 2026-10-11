@@ -109,7 +109,7 @@ export function DocumentDetail() {
           </Button>
           {doc ? (
             <>
-              <h1 className="text-2xl font-semibold tracking-tight">{doc.title}</h1>
+              <h1 className="font-display text-3xl font-medium tracking-tight">{doc.title}</h1>
               {doc.description && (
                 <p className="text-sm text-muted-foreground">{doc.description}</p>
               )}

@@ -143,7 +143,7 @@ export function SignDocument() {
           {assignment ? (
             <>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-semibold tracking-tight">
+                <h1 className="font-display text-3xl font-medium tracking-tight">
                   {assignment.documents?.title}
                 </h1>
                 <StatusBadge status={assignment.status} />

@@ -1,0 +1,46 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]: Sign Flow
+      - generic [ref=e12]:
+        - heading "Paperwork that gets signed, not chased." [level=2] [ref=e13]
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - generic [ref=e16]: "01"
+            - text: A manager uploads a PDF and picks who needs to sign it.
+          - listitem [ref=e17]:
+            - generic [ref=e18]: "02"
+            - text: Each employee reviews the document and signs on screen.
+          - listitem [ref=e19]:
+            - generic [ref=e20]: "03"
+            - text: The signed copy is saved and the manager sees who signed, and when.
+      - paragraph [ref=e21]: Secure document signing for teams
+    - main [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - heading "Create your account" [level=1] [ref=e25]
+          - paragraph [ref=e26]: Sign up to start reviewing and signing documents.
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29]: Full name
+            - textbox "Full name" [ref=e30]:
+              - /placeholder: Jane Doe
+          - generic [ref=e31]:
+            - button "Employee" [pressed] [ref=e32] [cursor=pointer]
+            - button "Manager" [ref=e33] [cursor=pointer]
+          - generic [ref=e34]:
+            - generic [ref=e35]: Email
+            - textbox "Email" [ref=e36]:
+              - /placeholder: you@company.com
+          - generic [ref=e37]:
+            - generic [ref=e38]: Password
+            - generic [ref=e39]:
+              - textbox "Password" [ref=e40]:
+                - /placeholder: At least 6 characters
+              - button "Show password" [ref=e41] [cursor=pointer]
+          - button "Create account" [ref=e45] [cursor=pointer]
+        - paragraph [ref=e46]:
+          - text: Already have an account?
+          - link "Sign in" [ref=e47] [cursor=pointer]:
+            - /url: /login
+  - region "Notifications alt+T"

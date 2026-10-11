@@ -97,6 +97,30 @@ export type Database = {
           },
         ]
       }
+      manager_invites: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

@@ -1,0 +1,41 @@
+- generic [ref=f3e2]:
+  - generic [ref=f3e109]:
+    - complementary [ref=f3e110]:
+      - generic [ref=f3e111]: Sign Flow
+      - generic [ref=f3e118]:
+        - heading "Paperwork that gets signed, not chased." [level=2] [ref=f3e119]
+        - list [ref=f3e120]:
+          - listitem [ref=f3e121]:
+            - generic [ref=f3e122]: "01"
+            - text: A manager uploads a PDF and picks who needs to sign it.
+          - listitem [ref=f3e123]:
+            - generic [ref=f3e124]: "02"
+            - text: Each employee reviews the document and signs on screen.
+          - listitem [ref=f3e125]:
+            - generic [ref=f3e126]: "03"
+            - text: The signed copy is saved and the manager sees who signed, and when.
+      - paragraph [ref=f3e127]: Secure document signing for teams
+    - main [ref=f3e128]:
+      - generic [ref=f3e129]:
+        - generic [ref=f3e130]:
+          - heading "Welcome back" [level=1] [ref=f3e131]
+          - paragraph [ref=f3e132]: Sign in to view and sign your documents.
+        - generic [ref=f3e133]:
+          - generic [ref=f3e134]:
+            - generic [ref=f3e135]: Email
+            - textbox "Email" [ref=f3e136]:
+              - /placeholder: you@company.com
+              - text: manager@signflow.test
+          - generic [ref=f3e137]:
+            - generic [ref=f3e138]: Password
+            - generic [ref=f3e139]:
+              - textbox "Password" [ref=f3e140]:
+                - /placeholder: Your password
+                - text: Password123!
+              - button "Show password" [ref=f3e141] [cursor=pointer]
+          - button "Sign in" [ref=f3e145] [cursor=pointer]
+        - paragraph [ref=f3e146]:
+          - text: Don't have an account?
+          - link "Sign up" [ref=f3e147] [cursor=pointer]:
+            - /url: /signup
+  - region "Notifications alt+T"

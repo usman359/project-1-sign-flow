@@ -1,0 +1,77 @@
+- generic:
+  - generic:
+    - generic [aria-hidden]:
+      - banner:
+        - generic:
+          - link:
+            - /url: /
+            - generic: Sign Flow
+          - navigation:
+            - link:
+              - /url: /manager
+              - text: Documents
+            - link:
+              - /url: /manager/upload
+              - text: Upload
+            - link:
+              - /url: /manager/team
+              - text: Team
+          - generic:
+            - generic: manager
+            - button [expanded]:
+              - generic: MM
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - link:
+                - /url: /manager
+                - text: All documents
+              - heading [level=1]: QA Employment Agreement
+              - paragraph: Uploaded 11 Oct 2026, 14:49 by Maya Manager
+            - button: View original
+          - generic:
+            - generic:
+              - generic: Signing status
+              - generic: 0 of 2 employees have signed
+            - generic:
+              - progressbar
+              - generic:
+                - generic:
+                  - table:
+                    - rowgroup:
+                      - row:
+                        - columnheader: Employee
+                        - columnheader: Status
+                        - columnheader: Signed by
+                        - columnheader: Signed at
+                        - columnheader: Signed PDF
+                    - rowgroup:
+                      - row:
+                        - cell:
+                          - generic: Alice Employee
+                          - generic: alice@signflow.test
+                        - cell:
+                          - generic: Pending
+                        - cell: —
+                        - cell: —
+                        - cell: Awaiting
+                      - row:
+                        - cell:
+                          - generic: Bob Employee
+                          - generic: bob@signflow.test
+                        - cell:
+                          - generic: Pending
+                        - cell: —
+                        - cell: —
+                        - cell: Awaiting
+    - region "Notifications alt+T":
+      - list:
+        - listitem:
+          - generic: Assigned "QA Employment Agreement" to 2 employee(s)
+  - menu "MM" [active] [ref=f3e103]:
+    - generic [ref=f3e104]:
+      - generic [ref=f3e105]: Maya Manager
+      - generic [ref=f3e106]: manager@signflow.test
+    - separator [ref=f3e107]
+    - menuitem "Sign out" [ref=f3e108]

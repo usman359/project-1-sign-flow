@@ -4,16 +4,18 @@ import { cn } from "@/lib/utils"
 
 export function Logo({ className, size = "md" }: { className?: string; size?: "md" | "lg" }) {
   return (
-    <span className={cn("flex items-center gap-2.5 font-semibold tracking-tight", className)}>
+    <span className={cn("flex items-center gap-2.5", className)}>
       <span
         className={cn(
-          "flex items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm",
-          size === "lg" ? "size-10" : "size-8"
+          "flex items-center justify-center rounded-md bg-primary text-primary-foreground",
+          size === "lg" ? "size-9" : "size-7"
         )}
       >
-        <FileSignatureIcon className={size === "lg" ? "size-6" : "size-5"} />
+        <FileSignatureIcon className={size === "lg" ? "size-5" : "size-4"} />
       </span>
-      <span className={size === "lg" ? "text-xl" : "text-base"}>Sign Flow</span>
+      <span className={cn("font-display font-medium tracking-tight", size === "lg" ? "text-2xl" : "text-xl")}>
+        Sign Flow
+      </span>
     </span>
   )
 }

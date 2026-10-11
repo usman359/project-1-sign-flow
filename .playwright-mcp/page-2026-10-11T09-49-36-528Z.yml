@@ -1,0 +1,41 @@
+- generic [ref=f3e2]:
+  - generic [ref=f3e148]:
+    - banner [ref=f3e149]:
+      - generic [ref=f3e150]:
+        - link "Sign Flow home" [ref=f3e151] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f3e152]: Sign Flow
+        - navigation [ref=f3e159]:
+          - link "My documents" [ref=f3e160] [cursor=pointer]:
+            - /url: /employee
+        - generic [ref=f3e161]:
+          - generic [ref=f3e162]: employee
+          - button "AE" [ref=f3e163] [cursor=pointer]
+    - main [ref=f3e166]:
+      - generic [ref=f3e167]:
+        - generic [ref=f3e168]:
+          - heading "Hello, Alice" [level=1] [ref=f3e169]
+          - paragraph [ref=f3e170]: You have 1 document waiting for your signature.
+        - generic [ref=f3e171]:
+          - tablist [ref=f3e172]:
+            - tab "Pending (1)" [selected] [ref=f3e173] [cursor=pointer]
+            - tab "Signed (1)" [ref=f3e174] [cursor=pointer]
+          - tabpanel "Pending (1)" [ref=f3e175]:
+            - table [ref=f3e179]:
+              - rowgroup [ref=f3e180]:
+                - row [ref=f3e181]:
+                  - columnheader "Document" [ref=f3e182]
+                  - columnheader "Status" [ref=f3e183]
+                  - columnheader "Assigned" [ref=f3e184]
+                  - columnheader "Signed" [ref=f3e185]
+                  - columnheader "Action" [ref=f3e186]
+              - rowgroup [ref=f3e187]:
+                - row [ref=f3e188]:
+                  - cell "QA Employment Agreement" [ref=f3e189]
+                  - cell "Pending" [ref=f3e194]
+                  - cell "11 Oct 2026, 14:49" [ref=f3e196]
+                  - cell "—" [ref=f3e197]
+                  - cell [ref=f3e198]:
+                    - link "Review & sign" [ref=f3e199] [cursor=pointer]:
+                      - /url: /employee/sign/52350b8b-b8c6-43a9-91bc-d4922f62eb0d
+  - region "Notifications alt+T"
