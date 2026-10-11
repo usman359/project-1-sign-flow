@@ -1,7 +1,15 @@
-import { useEffect, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { useCallback, useEffect, useState, type FormEvent } from "react"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
-import { ArrowLeftIcon, EyeIcon, FileTextIcon } from "lucide-react"
+import {
+  ArrowLeftIcon,
+  EyeIcon,
+  FileTextIcon,
+  Loader2Icon,
+  PencilIcon,
+  Trash2Icon,
+  UserPlusIcon,
+} from "lucide-react"
 
 import { PdfViewer } from "@/components/PdfViewer"
 import { StatusBadge, formatDate } from "@/components/StatusBadge"
@@ -11,9 +19,13 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -24,6 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
 import { DOCUMENTS_BUCKET, SIGNED_BUCKET, getFileUrl, supabase } from "@/lib/supabase"
 
 type DocumentWithAssignments = {
@@ -35,6 +48,7 @@ type DocumentWithAssignments = {
   uploader: { full_name: string; email: string } | null
   assignments: {
     id: string
+    employee_id: string
     status: "pending" | "signed"
     assigned_at: string
     signed_at: string | null
@@ -44,34 +58,119 @@ type DocumentWithAssignments = {
   }[]
 }
 
+type Employee = { id: string; full_name: string; email: string }
 type Preview = { title: string; description: string; url: string }
 
 export function DocumentDetail() {
   const { documentId } = useParams()
+  const navigate = useNavigate()
   const [doc, setDoc] = useState<DocumentWithAssignments | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [preview, setPreview] = useState<Preview | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState("")
+  const [editDescription, setEditDescription] = useState("")
+  const [adding, setAdding] = useState(false)
+  const [candidates, setCandidates] = useState<Employee[]>([])
+  const [picked, setPicked] = useState<Set<string>>(new Set())
+  const [busy, setBusy] = useState(false)
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!documentId) return
-    supabase
+    const { data, error } = await supabase
       .from("documents")
       .select(
         `id, title, description, file_path, created_at,
          uploader:profiles(full_name, email),
-         assignments(id, status, assigned_at, signed_at, signer_name, signed_file_path,
+         assignments(id, employee_id, status, assigned_at, signed_at, signer_name, signed_file_path,
            profiles(full_name, email))`
       )
       .eq("id", documentId)
       .maybeSingle()
-      .then(({ data, error }) => {
-        if (error || !data) {
-          setNotFound(true)
-          return
-        }
-        setDoc(data)
-      })
+    if (error || !data) setNotFound(true)
+    else setDoc(data)
   }, [documentId])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load()
+  }, [load])
+
+  const openEdit = () => {
+    if (!doc) return
+    setEditTitle(doc.title)
+    setEditDescription(doc.description ?? "")
+    setEditing(true)
+  }
+
+  const saveEdit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!doc) return
+    setBusy(true)
+    const { error } = await supabase
+      .from("documents")
+      .update({ title: editTitle.trim(), description: editDescription.trim() || null })
+      .eq("id", doc.id)
+    setBusy(false)
+    if (error) return toast.error(error.message)
+    toast.success("Document updated")
+    setEditing(false)
+    await load()
+  }
+
+  const deleteDocument = async () => {
+    if (!doc) return
+    if (!window.confirm(`Delete "${doc.title}" and all signed copies? This can't be undone.`)) return
+    setBusy(true)
+    const signedPaths = doc.assignments.flatMap((a) => (a.signed_file_path ? [a.signed_file_path] : []))
+    const { error } = await supabase.from("documents").delete().eq("id", doc.id)
+    if (error) {
+      setBusy(false)
+      return toast.error(error.message)
+    }
+    await supabase.storage.from(DOCUMENTS_BUCKET).remove([doc.file_path])
+    if (signedPaths.length) await supabase.storage.from(SIGNED_BUCKET).remove(signedPaths)
+    toast.success("Document deleted")
+    navigate("/manager")
+  }
+
+  const removeAssignment = async (a: DocumentWithAssignments["assignments"][number]) => {
+    const name = a.profiles?.full_name || a.profiles?.email || "this employee"
+    const warning = a.status === "signed" ? " Their signed copy will be deleted too." : ""
+    if (!window.confirm(`Remove ${name} from this document?${warning}`)) return
+    const { error } = await supabase.from("assignments").delete().eq("id", a.id)
+    if (error) return toast.error(error.message)
+    if (a.signed_file_path) await supabase.storage.from(SIGNED_BUCKET).remove([a.signed_file_path])
+    toast.success(`Removed ${name}`)
+    await load()
+  }
+
+  const openAdd = async () => {
+    if (!doc) return
+    setPicked(new Set())
+    setAdding(true)
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .eq("role", "employee")
+      .order("full_name")
+    if (error) return toast.error(error.message)
+    const assigned = new Set(doc.assignments.map((a) => a.employee_id))
+    setCandidates((data ?? []).filter((emp) => !assigned.has(emp.id)))
+  }
+
+  const saveAdd = async () => {
+    if (!doc || picked.size === 0) return
+    setBusy(true)
+    const { error } = await supabase
+      .from("assignments")
+      .insert([...picked].map((employee_id) => ({ document_id: doc.id, employee_id })))
+    setBusy(false)
+    if (error) return toast.error(error.message)
+    toast.success(`Assigned to ${picked.size} more employee(s)`)
+    setAdding(false)
+    await load()
+  }
 
   const openPreview = async (bucket: string, path: string, title: string, description: string) => {
     try {
@@ -123,24 +222,42 @@ export function DocumentDetail() {
           )}
         </div>
         {doc && (
-          <Button
-            variant="outline"
-            onClick={() =>
-              openPreview(DOCUMENTS_BUCKET, doc.file_path, doc.title, "Original, unsigned document")
-            }
-          >
-            <FileTextIcon />
-            View original
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                openPreview(DOCUMENTS_BUCKET, doc.file_path, doc.title, "Original, unsigned document")
+              }
+            >
+              <FileTextIcon />
+              View original
+            </Button>
+            <Button variant="outline" onClick={openEdit}>
+              <PencilIcon />
+              Edit
+            </Button>
+            <Button variant="outline" onClick={deleteDocument} disabled={busy}>
+              <Trash2Icon />
+              Delete
+            </Button>
+          </div>
         )}
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Signing status</CardTitle>
-          <CardDescription>
-            {signed} of {assignments.length} employees have signed
-          </CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div className="flex flex-col gap-1.5">
+            <CardTitle>Signing status</CardTitle>
+            <CardDescription>
+              {signed} of {assignments.length} employees have signed
+            </CardDescription>
+          </div>
+          {doc && (
+            <Button size="sm" variant="outline" onClick={openAdd}>
+              <UserPlusIcon />
+              Add employees
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <Progress value={assignments.length ? (signed / assignments.length) * 100 : 0} />
@@ -175,6 +292,7 @@ export function DocumentDetail() {
                     <TableCell>{a.signer_name ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">{formatDate(a.signed_at)}</TableCell>
                     <TableCell className="pr-6 text-right">
+                      <div className="flex items-center justify-end gap-2">
                       {a.signed_file_path ? (
                         <Button
                           size="sm"
@@ -194,6 +312,15 @@ export function DocumentDetail() {
                       ) : (
                         <span className="text-sm text-muted-foreground">Awaiting</span>
                       )}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label="Remove employee"
+                        onClick={() => removeAssignment(a)}
+                      >
+                        <Trash2Icon />
+                      </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -202,6 +329,88 @@ export function DocumentDetail() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={editing} onOpenChange={setEditing}>
+        <DialogContent className="sm:max-w-md">
+          <form onSubmit={saveEdit} className="flex flex-col gap-4">
+            <DialogHeader>
+              <DialogTitle>Edit document</DialogTitle>
+              <DialogDescription>Change the title or description employees see.</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="editTitle">Title</Label>
+              <Input
+                id="editTitle"
+                required
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="editDescription">Description</Label>
+              <Textarea
+                id="editDescription"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditing(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={busy || !editTitle.trim()}>
+                {busy && <Loader2Icon className="animate-spin" />}
+                Save
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={adding} onOpenChange={setAdding}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add employees</DialogTitle>
+            <DialogDescription>Choose who else needs to sign this document.</DialogDescription>
+          </DialogHeader>
+          <div className="flex max-h-72 flex-col gap-1 overflow-y-auto">
+            {candidates.length === 0 && (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                Every employee is already assigned.
+              </p>
+            )}
+            {candidates.map((emp) => (
+              <label
+                key={emp.id}
+                className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 hover:bg-muted"
+              >
+                <Checkbox
+                  checked={picked.has(emp.id)}
+                  onCheckedChange={(checked) =>
+                    setPicked((prev) => {
+                      const next = new Set(prev)
+                      if (checked) next.add(emp.id)
+                      else next.delete(emp.id)
+                      return next
+                    })
+                  }
+                />
+                <span className="text-sm font-medium">{emp.full_name || "Unnamed"}</span>
+                <span className="text-xs text-muted-foreground">{emp.email}</span>
+              </label>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAdding(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveAdd} disabled={busy || picked.size === 0}>
+              {busy && <Loader2Icon className="animate-spin" />}
+              Assign
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!preview} onOpenChange={(open) => !open && setPreview(null)}>
         <DialogContent className="max-h-[90svh] overflow-x-hidden overflow-y-auto sm:max-w-4xl">
