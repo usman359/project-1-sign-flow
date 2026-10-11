@@ -35,7 +35,10 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName.trim() } },
+        options: {
+          data: { full_name: fullName.trim() },
+          emailRedirectTo: window.location.origin,
+        },
       })
       if (error) setError(error.message)
       else if (!data.session) setNotice("Check your email to confirm your account, then sign in.")
