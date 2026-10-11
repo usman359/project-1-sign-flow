@@ -30,7 +30,6 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isManager, setIsManager] = useState(false)
-  const [inviteCode, setInviteCode] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [needsConfirmation, setNeedsConfirmation] = useState(false)
   const [awaitingEmail, setAwaitingEmail] = useState(false)
@@ -70,7 +69,7 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
         options: {
           data: {
             full_name: fullName.trim(),
-            ...(isManager && { invite_code: inviteCode.trim() }),
+            role: isManager ? "manager" : "employee",
           },
           emailRedirectTo: window.location.origin,
         },
@@ -252,19 +251,6 @@ export function AuthPage({ mode }: { mode: "login" | "signup" }) {
                     </button>
                   </div>
                 </div>
-                {isSignup && isManager && (
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="inviteCode">Manager invite code</Label>
-                    <Input
-                      id="inviteCode"
-                      required
-                      autoComplete="off"
-                      placeholder="Ask an existing manager for a code"
-                      value={inviteCode}
-                      onChange={(e) => setInviteCode(e.target.value)}
-                    />
-                  </div>
-                )}
                 <Button type="submit" size="lg" className="mt-2 w-full" disabled={submitting}>
                   {submitting && <Loader2Icon className="animate-spin" />}
                   {isSignup ? "Create account" : "Sign in"}

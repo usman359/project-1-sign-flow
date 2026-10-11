@@ -34,7 +34,6 @@ export function AppLayout() {
       ? [
           { to: "/manager", label: "Documents", end: true },
           { to: "/manager/upload", label: "Upload", end: false },
-          { to: "/manager/team", label: "Team", end: false },
         ]
       : [{ to: "/employee", label: "My documents", end: true }]
 
