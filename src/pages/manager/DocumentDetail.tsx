@@ -26,6 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -37,6 +38,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
+import { useQueryParam } from "@/lib/useQueryParam"
 import { DOCUMENTS_BUCKET, SIGNED_BUCKET, getFileUrl, supabase } from "@/lib/supabase"
 
 type DocumentWithAssignments = {
@@ -74,6 +76,7 @@ export function DocumentDetail() {
   const [candidates, setCandidates] = useState<Employee[]>([])
   const [picked, setPicked] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState(false)
+  const [filter, setFilter] = useQueryParam("status", "all")
 
   const load = useCallback(async () => {
     if (!documentId) return
@@ -195,6 +198,7 @@ export function DocumentDetail() {
     (a.profiles?.full_name ?? "").localeCompare(b.profiles?.full_name ?? "")
   )
   const signed = assignments.filter((a) => a.status === "signed").length
+  const shown = assignments.filter((a) => filter === "all" || a.status === filter)
 
   return (
     <div className="flex flex-col gap-6">
@@ -261,6 +265,13 @@ export function DocumentDetail() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <Progress value={assignments.length ? (signed / assignments.length) * 100 : 0} />
+          <Tabs value={filter === "signed" || filter === "pending" ? filter : "all"} onValueChange={setFilter}>
+            <TabsList>
+              <TabsTrigger value="all">All ({assignments.length})</TabsTrigger>
+              <TabsTrigger value="signed">Signed ({signed})</TabsTrigger>
+              <TabsTrigger value="pending">Pending ({assignments.length - signed})</TabsTrigger>
+            </TabsList>
+          </Tabs>
           <div className="-mx-6 border-t">
             <Table>
               <TableHeader>
@@ -280,7 +291,7 @@ export function DocumentDetail() {
                     </TableCell>
                   </TableRow>
                 )}
-                {assignments.map((a) => (
+                {shown.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell className="pl-6">
                       <div className="font-medium">{a.profiles?.full_name || "Unnamed"}</div>

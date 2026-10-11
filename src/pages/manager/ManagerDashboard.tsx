@@ -3,10 +3,12 @@ import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { CheckCircle2Icon, ClockIcon, FileTextIcon, UploadIcon } from "lucide-react"
 
+import { SearchInput } from "@/components/SearchInput"
 import { formatDate } from "@/components/StatusBadge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -16,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useQueryParam } from "@/lib/useQueryParam"
 import { supabase } from "@/lib/supabase"
 
 type DocumentRow = {
@@ -36,6 +39,8 @@ type RecentSignature = {
 export function ManagerDashboard() {
   const [documents, setDocuments] = useState<DocumentRow[] | null>(null)
   const [recent, setRecent] = useState<RecentSignature[] | null>(null)
+  const [query, setQuery] = useQueryParam("q", "")
+  const [status, setStatus] = useQueryParam("status", "all")
 
   useEffect(() => {
     supabase
@@ -57,6 +62,17 @@ export function ManagerDashboard() {
         setRecent(data ?? [])
       })
   }, [])
+
+  const needle = query.trim().toLowerCase()
+  const visible = documents?.filter((d) => {
+    if (needle && !d.title.toLowerCase().includes(needle)) return false
+    const total = d.assignments.length
+    const done = d.assignments.filter((a) => a.status === "signed").length
+    const complete = total > 0 && done === total
+    if (status === "complete") return complete
+    if (status === "progress") return !complete
+    return true
+  })
 
   const all = documents?.flatMap((d) => d.assignments) ?? []
   const signedCount = all.filter((a) => a.status === "signed").length
@@ -99,6 +115,17 @@ export function ManagerDashboard() {
         ))}
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Tabs value={["progress", "complete"].includes(status) ? status : "all"} onValueChange={setStatus}>
+          <TabsList>
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="progress">In progress</TabsTrigger>
+            <TabsTrigger value="complete">Complete</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <SearchInput value={query} onChange={setQuery} placeholder="Search documents" />
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="py-0 lg:col-span-2">
           <CardContent className="px-0">
@@ -119,6 +146,13 @@ export function ManagerDashboard() {
                       </TableCell>
                     </TableRow>
                   ))}
+                {documents && documents.length > 0 && visible?.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="py-10 text-center text-sm text-muted-foreground">
+                      No documents match your filters.
+                    </TableCell>
+                  </TableRow>
+                )}
                 {documents?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={3} className="py-14 text-center">
@@ -139,7 +173,7 @@ export function ManagerDashboard() {
                     </TableCell>
                   </TableRow>
                 )}
-                {documents?.map((doc) => {
+                {visible?.map((doc) => {
                   const total = doc.assignments.length
                   const signed = doc.assignments.filter((a) => a.status === "signed").length
                   return (

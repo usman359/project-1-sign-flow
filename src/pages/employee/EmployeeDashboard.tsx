@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { CheckCircle2Icon, DownloadIcon, FileTextIcon, InboxIcon, PenLineIcon } from "lucide-react"
 
+import { SearchInput } from "@/components/SearchInput"
 import { StatusBadge, formatDate } from "@/components/StatusBadge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/context/AuthProvider"
+import { useQueryParam } from "@/lib/useQueryParam"
 import { SIGNED_BUCKET, getFileUrl, supabase } from "@/lib/supabase"
 
 type Row = {
@@ -47,8 +49,14 @@ export function EmployeeDashboard() {
       })
   }, [profile])
 
-  const pending = rows?.filter((r) => r.status === "pending") ?? []
-  const signed = rows?.filter((r) => r.status === "signed") ?? []
+  const totalPending = rows?.filter((r) => r.status === "pending").length ?? 0
+  const [tab, setTab] = useQueryParam("tab", "pending")
+  const [query, setQuery] = useQueryParam("q", "")
+
+  const needle = query.trim().toLowerCase()
+  const matches = rows?.filter((r) => !needle || (r.documents?.title ?? "").toLowerCase().includes(needle))
+  const pending = matches?.filter((r) => r.status === "pending") ?? []
+  const signed = matches?.filter((r) => r.status === "signed") ?? []
 
   const openSigned = async (path: string) => {
     try {
@@ -67,22 +75,25 @@ export function EmployeeDashboard() {
         <p className="text-sm text-muted-foreground">
           {rows === null
             ? "Loading your documents…"
-            : pending.length > 0
-              ? `You have ${pending.length} document${pending.length === 1 ? "" : "s"} waiting for your signature.`
+            : totalPending > 0
+              ? `You have ${totalPending} document${totalPending === 1 ? "" : "s"} waiting for your signature.`
               : "You're all caught up. Nothing is waiting for your signature."}
         </p>
       </div>
 
-      <Tabs defaultValue="pending">
+      <Tabs value={tab === "signed" ? "signed" : "pending"} onValueChange={setTab}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
         <TabsList>
           <TabsTrigger value="pending">Pending ({pending.length})</TabsTrigger>
           <TabsTrigger value="signed">Signed ({signed.length})</TabsTrigger>
         </TabsList>
+        <SearchInput value={query} onChange={setQuery} placeholder="Search documents" />
+        </div>
 
         <TabsContent value="pending">
           <AssignmentTable
-            rows={rows && pending}
-            empty="Nothing to sign right now."
+            rows={matches ? pending : null}
+            empty={needle ? "No pending documents match your search." : "Nothing to sign right now."}
             emptyIcon={<CheckCircle2Icon className="size-5" />}
             action={(row) => (
               <Button asChild size="sm">
@@ -97,8 +108,8 @@ export function EmployeeDashboard() {
 
         <TabsContent value="signed">
           <AssignmentTable
-            rows={rows && signed}
-            empty="You haven't signed any documents yet."
+            rows={matches ? signed : null}
+            empty={needle ? "No signed documents match your search." : "You haven't signed any documents yet."}
             emptyIcon={<InboxIcon className="size-5" />}
             action={(row) =>
               row.signed_file_path && (
