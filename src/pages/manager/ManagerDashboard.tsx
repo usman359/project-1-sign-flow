@@ -121,8 +121,21 @@ export function ManagerDashboard() {
                   ))}
                 {documents?.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="py-10 text-center text-muted-foreground">
-                      No documents yet. Upload one to get started.
+                    <TableCell colSpan={3} className="py-14 text-center">
+                      <div className="mx-auto flex max-w-xs flex-col items-center gap-3">
+                        <span className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                          <FileTextIcon className="size-5" />
+                        </span>
+                        <p className="text-sm text-muted-foreground">
+                          No documents yet. Upload a PDF and assign it to your team.
+                        </p>
+                        <Button asChild size="sm">
+                          <Link to="/manager/upload">
+                            <UploadIcon />
+                            Upload document
+                          </Link>
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}

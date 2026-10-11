@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
-import { DownloadIcon, FileTextIcon, PenLineIcon } from "lucide-react"
+import { CheckCircle2Icon, DownloadIcon, FileTextIcon, InboxIcon, PenLineIcon } from "lucide-react"
 
 import { StatusBadge, formatDate } from "@/components/StatusBadge"
 import { Button } from "@/components/ui/button"
@@ -61,9 +61,15 @@ export function EmployeeDashboard() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">My documents</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Hello{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Review and sign the documents assigned to you.
+          {rows === null
+            ? "Loading your documents…"
+            : pending.length > 0
+              ? `You have ${pending.length} document${pending.length === 1 ? "" : "s"} waiting for your signature.`
+              : "You're all caught up. Nothing is waiting for your signature."}
         </p>
       </div>
 
@@ -77,6 +83,7 @@ export function EmployeeDashboard() {
           <AssignmentTable
             rows={rows && pending}
             empty="Nothing to sign right now."
+            emptyIcon={<CheckCircle2Icon className="size-5" />}
             action={(row) => (
               <Button asChild size="sm">
                 <Link to={`/employee/sign/${row.id}`}>
@@ -92,6 +99,7 @@ export function EmployeeDashboard() {
           <AssignmentTable
             rows={rows && signed}
             empty="You haven't signed any documents yet."
+            emptyIcon={<InboxIcon className="size-5" />}
             action={(row) =>
               row.signed_file_path && (
                 <Button
@@ -114,10 +122,12 @@ export function EmployeeDashboard() {
 function AssignmentTable({
   rows,
   empty,
+  emptyIcon,
   action,
 }: {
   rows: Row[] | null
   empty: string
+  emptyIcon: React.ReactNode
   action: (row: Row) => React.ReactNode
 }) {
   return (
@@ -144,8 +154,13 @@ function AssignmentTable({
               ))}
             {rows?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
-                  {empty}
+                <TableCell colSpan={5} className="py-14 text-center text-muted-foreground">
+                  <div className="mx-auto flex max-w-xs flex-col items-center gap-2">
+                    <span className="flex size-10 items-center justify-center rounded-full bg-muted">
+                      {emptyIcon}
+                    </span>
+                    <p className="text-sm">{empty}</p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}

@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet } from "react-router-dom"
-import { FileSignatureIcon, LogOutIcon } from "lucide-react"
+import { LogOutIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Logo } from "@/components/Logo"
 import { useAuth } from "@/context/AuthProvider"
 import { cn } from "@/lib/utils"
 
@@ -37,12 +38,11 @@ export function AppLayout() {
       : [{ to: "/employee", label: "My documents", end: true }]
 
   return (
-    <div className="min-h-svh bg-muted/30">
+    <div className="min-h-svh bg-muted/40">
       <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <FileSignatureIcon className="size-5" />
-            Sign Flow
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:gap-6">
+          <Link to="/" aria-label="Sign Flow home">
+            <Logo />
           </Link>
           <nav className="flex items-center gap-1">
             {links.map((link) => (
@@ -53,7 +53,7 @@ export function AppLayout() {
                 className={({ isActive }) =>
                   cn(
                     "rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground",
-                    isActive && "bg-muted text-foreground"
+                    isActive && "bg-accent font-medium text-accent-foreground"
                   )
                 }
               >
@@ -62,7 +62,7 @@ export function AppLayout() {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-3">
-            <Badge variant="secondary" className="capitalize">
+            <Badge variant="secondary" className="hidden capitalize sm:inline-flex">
               {profile.role}
             </Badge>
             <DropdownMenu>
@@ -88,7 +88,7 @@ export function AppLayout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
         <Outlet />
       </main>
     </div>
